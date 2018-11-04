@@ -1,0 +1,6 @@
+#github auth config
+githubClientId: "5f10413ae1298e61d488"
+githubClientSecret: "76e45c50e89a14f6a6a0d9beff3cc22fbdce5fd7"
+githubCodeHost: "https://github.com/login/oauth/authorize"
+githubAuthHost: "https://github.com/login/oauth/access_token"
+captcha: true
