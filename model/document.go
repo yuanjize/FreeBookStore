@@ -33,7 +33,7 @@ const (
 	documentInsert = "INSERT INTO document(id,bookname,sectioncount,owner,readcount,favoritescount,description,score,url,privately_owned,identify,picture,createat,last_modify_text) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	documentQuery  = "SELECT id,bookname,sectioncount,owner,readcount,favoritescount,description,score,url,privately_owned,identify,picture,createat,last_modify_text FROM document WHERE %s=?"
 	documentUpdate = "UPDATE document SET id=?,bookname=?,sectioncount=?,owner=?,readcount=?,favoritescount=?,description=?,score=?,url=?,privately_owned=?,identify=?,picture=?,createat=?,last_modify_text=? WHERE id = ?"
-	documentSelectAll = "SELECT id,bookname,sectioncount,owner,readcount,favoritescount,description,score,url,privately_owned,identify,picture,createat,last_modify_text FROM document WHERE privately_owned = ?"
+	documentSelectAll = "SELECT id,bookname,sectioncount,owner,readcount,favoritescount,description,score,url,privately_owned,identify,picture,createat,last_modify_text FROM document WHERE privately_owned = ? and owner=?"
 )
 
 func NewDocument() *Document {
@@ -86,7 +86,7 @@ func (this *Document) Find(fieldName, value string) (err error) {
 func QueryAllDocument(user *Account,pri int)(err error,documents []*Document){
 	documents = make([]*Document,0,10)
 	var rows *sql.Rows
-	rows, err = DB.Query(documentSelectAll,pri)
+	rows, err = DB.Query(documentSelectAll,pri,user.Id)
 	if err!=nil{
 		return
 	}

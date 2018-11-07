@@ -33,11 +33,9 @@ type AddDocumentRequest struct {
 
 
 func AddBook(c *gin.Context){
-	user, ok := IsLogin(c)
-	if !ok{
-		c.Redirect(http.StatusTemporaryRedirect,"/login.html")
-		return
-	}
+	//user, ok := IsLogin(c)
+	user ,_:= c.Get("user")
+
 	account := user.(*model.Account)
 	result := gin.H{}
 	result["errcode"]="1"
@@ -81,22 +79,19 @@ func AddBook(c *gin.Context){
 }
 
 func Myproject(c *gin.Context){
-	login, ok := IsLogin(c)
-	if !ok{
-		c.Redirect(http.StatusTemporaryRedirect,"/login.html")
-		return
-	}
+	user ,_:= c.Get("user")
+
 	private := c.Query("private")
 	pri := 0
 	if private!=""{
 		pri ,_ = strconv.Atoi(private)
 	}
-	err, documents := model.QueryAllDocument(login.(*model.Account),pri)
+	err, documents := model.QueryAllDocument(user.(*model.Account),pri)
 	if err != nil{
 		documents = nil
 	}
 	c.HTML(http.StatusOK,"book/index.html",gin.H{
-		"Member":login,
+		"Member":user,
 		"Private":pri,
 		"BaseUrl":config.Host,
 		"Result" :documents,
@@ -115,10 +110,6 @@ func DocumentPic(c *gin.Context) {
 }
 
 func ReadDocument(c *gin.Context)  {
-	_, login := IsLogin(c)
-	if !login{
-		return
-	}
 	documentPath := c.Param("identify")
 	document := model.NewDocument()
 	document.Find("Identify",documentPath)
@@ -126,13 +117,14 @@ func ReadDocument(c *gin.Context)  {
 }
 
 func UploadDocument(c *gin.Context) {
-	user, login := IsLogin(c)
+
+	user ,_:= c.Get("user")
 	documentId := c.Param("id")
 	form, _ := c.MultipartForm()
 	files := form.File
 	result := gin.H{"msg":"ok","errcode":0}
 	docs,ok := files["doc"]
-	if !ok || len(docs)==0 || !login{
+	if !ok || len(docs)==0{
 		result["errcode"] = 1
 		result["msg"] = "上传文件失败"
 		c.JSON(http.StatusOK,result)

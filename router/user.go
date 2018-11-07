@@ -10,29 +10,29 @@ import (
 	"path/filepath"
 	"github.com/yuanjize/FreeBookStore/config"
 	"path"
+	"github.com/gin-contrib/sessions"
 )
 
 func UserInfo(c *gin.Context) {
-	user, ok := IsLogin(c)
-
-	if !ok {
-		c.Redirect(http.StatusTemporaryRedirect, "/login") //login
-	} else {
+		user ,_:= c.Get("user")
 		account := user.(*model.Account)
 		//bytes, er := json.Marshal(account)
 		c.HTML(http.StatusOK,"setting/index.html", gin.H{
 			"Member": account,
 		})
 		SaveUser(c,account)
-	}
+}
+
+func Logout(c *gin.Context)  {
+	session := sessions.Default(c)
+	session.Set("user",nil)
+	session.Delete("user")
+	session.Save()
+	c.Redirect(http.StatusSeeOther,"/login")
 }
 
 func ModifyUserInfo(c *gin.Context) {
-	user, ok := IsLogin(c)
-
-	if !ok {
-		c.Redirect(http.StatusTemporaryRedirect, "/login") //login
-	} else {
+		user ,_:= c.Get("user")
 		account := user.(*model.Account)
 		eamil := c.PostForm("email")
 		phone := c.PostForm("phone")
@@ -56,32 +56,20 @@ func ModifyUserInfo(c *gin.Context) {
 			})
 		}
 	}
-}
 
 func GetModifyPassword(c *gin.Context) {
-	login, ok := IsLogin(c)
-	if !ok || login==nil{
-		c.Redirect(http.StatusTemporaryRedirect,"/login.html")
-	}else{
+		user ,_:= c.Get("user")
 		c.HTML(http.StatusOK, "setting/password.html",gin.H{
-			"Member":login.(*model.Account),
+			"Member":user.(*model.Account),
 		})
 	}
-
-}
 
 func UploadHeader(c *gin.Context) {
 	logger := log.New(os.Stderr, "[UploadHeader]", log.Flags())
 	form, err := c.MultipartForm()
 	result := gin.H{}
-	login, ok := IsLogin(c)
-	if !ok {
-		logger.Println("Please login")
-		result["errcode"] = "1"
-		result["msg"] = "请登录"
-		c.JSON(http.StatusOK, result)
-		return
-	}
+	user ,_:= c.Get("user")
+
 	if err != nil {
 		logger.Println("Parse File fail")
 		result["errcode"] = "1"
@@ -118,7 +106,7 @@ func UploadHeader(c *gin.Context) {
 					result["errcode"] = "1"
 					result["msg"] = "文件接收失败"
 				} else {
-					account := login.(*model.Account)
+					account := user.(*model.Account)
 					account.Header, _ = filepath.Abs(filePath)
 					err := account.Update()
 					if err != nil {
@@ -137,10 +125,7 @@ func UploadHeader(c *gin.Context) {
 }
 
 func GetHeader(c *gin.Context)  {
-	user, ok := IsLogin(c)
-	if!ok{
-		c.Redirect(http.StatusTemporaryRedirect,"/login");
-	}else{
+		user ,_:= c.Get("user")
 		account := user.(*model.Account)
 		picLocation,_ := filepath.Abs("./avatar.jpeg")
 		if account.Header!=""{
@@ -148,13 +133,9 @@ func GetHeader(c *gin.Context)  {
 		}
 		c.File(picLocation)
 	}
-}
 
 func ModifyPassword(c *gin.Context) {
-	user, ok := IsLogin(c)
-	if !ok {
-		c.Redirect(http.StatusTemporaryRedirect, "/login") //login
-	} else {
+		user ,_:= c.Get("user")
 		oldPassed := c.PostForm("oldpasswd")
 		newPasswd1 := c.PostForm("newpasswd1")
 		newPasswd2 := c.PostForm("newpasswd2")
@@ -189,4 +170,3 @@ func ModifyPassword(c *gin.Context) {
 			})
 		}
 	}
-}

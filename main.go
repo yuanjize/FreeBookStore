@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"encoding/gob"
 	"github.com/yuanjize/FreeBookStore/model"
+	"github.com/yuanjize/FreeBookStore/middleware"
 )
 
 func init() {
@@ -18,7 +19,7 @@ func init() {
 func main() {
 	engine := gin.Default()
 	store := cookie.NewStore([]byte("secret"))
-	engine.Use(sessions.Sessions("msession", store))
+	engine.Use(sessions.Sessions("msession", store),middleware.LoginCheck)
 	engine.StaticFS("/static", http.Dir("./static"))
 	engine.LoadHTMLGlob("./views/*/*")
 
@@ -40,7 +41,8 @@ func main() {
 	engine.GET("/book/:identify",router.ReadDocument)
 	engine.POST("/uploaddocument/:id",router.UploadDocument)
 	engine.POST("/adddocument",router.AddBook)
-	//engine.GET("/adddocument",router.AddBook)
+	engine.GET("/logout",router.Logout)
+
 
 	setting := engine.Group("/setting/")
 	setting.GET("/myproject", router.Myproject)

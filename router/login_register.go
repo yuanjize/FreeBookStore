@@ -47,7 +47,7 @@ func Auths(context *gin.Context) {
 		"redirect_uri": "http://localhost:8080/Token",
 	}, nil)
 
-	context.Redirect(http.StatusTemporaryRedirect, request.URL.String())
+	context.Redirect(http.StatusSeeOther, request.URL.String())
 }
 
 func GetLogin(c *gin.Context) {
@@ -84,7 +84,9 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"msg":     "登陆成功",
 			"errcode": "0",
+			"location":config.Host + "setting/info",
 		})
+		//c.Redirect(http.StatusSeeOther,"/setting/info")
 	} else {
 		log.Println("Login err:", err)
 		c.JSON(http.StatusOK, gin.H{
@@ -111,7 +113,8 @@ func Register(c *gin.Context) {
 	captchaId := session.Get("captchaId")
 
 	if captchaId != nil {
-		if !checkCaptcha(captchaId.(string), captcha) {
+		ok := checkCaptcha(captchaId.(string), captcha)
+		if ! ok{
 			err := errors.New("Verfiy Code Failed")
 			c.Error(err)
 			c.JSON(http.StatusOK, gin.H{
@@ -175,11 +178,8 @@ func Register(c *gin.Context) {
 			"errcode:": "1",
 		})
 	} else {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":      "register success",
-			"errcode:": "0",
-			"location": "http://localhost:8080/login",
-		})
+		log.Println("register ok,waiting jump login page")
+		c.Redirect(http.StatusSeeOther,"/login")
 	}
 }
 
@@ -200,9 +200,6 @@ func GenerateCaptchaHandler(c *gin.Context) {
 func genCaptcha(c *gin.Context) string {
 	// get session
 	session := sessions.Default(c)
-	session.Options(sessions.Options{
-		Path: "/",
-	})
 	captchaConfig := util.GetCaptchaConfig()
 	//create base64 encoding captcha
 	//创建base64图像验证码

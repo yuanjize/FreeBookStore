@@ -32,16 +32,16 @@
                     <li>
                         <a href="{{  "BookController.Index"}}" title="我的项目"><i class="fa fa-book" aria-hidden="true"></i> 我的项目</a>
                     </li>
-                    <li>
-                        <a href="{{  "SettingController.Qrcode"}}" title="我的二维码"><i class="fa fa-qrcode" aria-hidden="true"></i> 我的二维码</a>
-                    </li>
+                    {{/*<li>*/}}
+                        {{/*<a href="{{  "SettingController.Qrcode"}}" title="我的二维码"><i class="fa fa-qrcode" aria-hidden="true"></i> 我的二维码</a>*/}}
+                    {{/*</li>*/}}
                 {{if eq .Member.Role 0 }}
                     <li>
                         <a href="{{  "ManagerController.Index"}}" title="管理后台"><i class="fa fa-university" aria-hidden="true"></i> 管理后台</a>
                     </li>
                 {{end}}
                     <li>
-                        <a href="{{  "AccountController.Logout"}}" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
+                        <a href="/logout" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
                     </li>
                 {{else}}
                     <li><a href="{{  "AccountController.Oauth" ":oauth" "email"}}" title="注册"><i class="fa fa-user-plus"></i> 注册</a></li>
@@ -112,7 +112,7 @@
                         </li>
                         {{end}}
                         <li>
-                            <a href="{{  "AccountController.Logout"}}" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
+                            <a href="/logout" title="退出登录"><i class="fa fa-sign-out"></i> 退出登录</a>
                         </li>
                     </ul>
                 </li>
